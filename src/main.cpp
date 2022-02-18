@@ -1,101 +1,148 @@
+/*---------------Libraries-----------------------------*/
 #include <Arduino.h>
-#include <AccelStepper.h>
-// Create an IntervalTimer object 
+#include <SPI.h>
+
+/*---------------Module Defines-----------------------------*/
+
+#define REDLED 23
+#define BLUELED 22
+#define WAITINGLED 21
+#define TEAMPOTPIN A6
+//#define GGTIME 250000000
+#define GGTIME 20000000
+/*---------------Module Function Prototypes-----------------*/
+//handle state functions
+void handleWaiting(void);
+void handleGoToBlueSheep(void);
+void handleGoToRedSheep(void);
+void handleGG(void);
+
+//move robot functions
+void driveForward(void);
+void driveBackward(void);
+void stopDriving(void);
+void stopAllMotors(void);
+void turnRight(void);
+void turnLeft(void);
+void lineFollow(void);
+
+//additional useful functions
+int potRead(int pin);
 
 
-#define MotorPin 0
-#define AnalogPin 16
-
-#define left LOW
-#define MAXSPEED 400
-#define pinDirection 7
-#define StepPin 3
-#define Potentiometer 23
-uint32_t period = 2040;
-IntervalTimer OnTimer;
-IntervalTimer OffTimer;
 
 
-uint8_t ledState;
-uint16_t duty; //amount which it is on (1-100)
-volatile uint32_t count;
-uint32_t time;
-int16_t val;
-uint32_t timePassed;
-uint8_t direction = HIGH;
+/*---------------State Definitions--------------------------*/
+typedef enum {WAITING, GO_TO_SHEEP_RED, GO_TO_SHEEP_BLUE,GG} States_t;
 
 
+/*---------------Module Variables---------------------------*/
+IntervalTimer GGtimer;
+States_t state;
+int potval;
+int teamcolorval;
 
-void OnFxn(void);
-void OffFxn(void);
-void Stop(void);
-void ChangeDIR(void);
- AccelStepper stepper(1,StepPin,9);
+/*---------------Main Functions----------------*/
 
 void setup() {
-  pinMode(MotorPin, OUTPUT);
-  pinMode(Potentiometer, INPUT);
-  pinMode(AnalogPin, OUTPUT);
- // digitalWrite(MotorPin, HIGH);
-  pinMode(pinDirection, OUTPUT);
- // pinMode(pinStep, OUTPUT);
- stepper.setMaxSpeed(MAXSPEED);
-  OnTimer.begin(OnFxn, period); //put in frequency
-  Serial.begin(9600);
+  pinMode(BLUELED, OUTPUT);
+  pinMode(REDLED, OUTPUT);
+  pinMode(WAITINGLED, OUTPUT);
+  pinMode(TEAMPOTPIN, INPUT);
+  state = WAITING;
+  GGtimer.begin(handleGG,GGTIME);
+
 }
-
-
-
-void loop() {
-//  Serial.println("hi");
-
-  val = analogRead(Potentiometer);
-  val = map(val, 0, 1023,1, 99 ); //part 1
-  //digitalWrite(pinDirection, direction);
-  val = map(val, 0, 1023, 0, MAXSPEED ); //part 4
-  stepper.setSpeed(val);
-  
-  //analogWrite(AnalogPin, val);
-  if(Serial.available()>0){
-    Serial.read();
-    Stop(); //part 1
-    ChangeDIR(); //part 4
+void loop(){
+  switch (state) {
+    case WAITING:
+      handleWaiting();
+      break;
+    case GO_TO_SHEEP_BLUE:
+      handleGoToBlueSheep();
+      break;
+    case GO_TO_SHEEP_RED:
+      handleGoToRedSheep();
+      break;
+    case GG:
+      handleGG();
+      break;
+    default:    // Should never get into an unhandled state
+      Serial.println("What is this I do not even...");
   }
-  stepper.runSpeed();
 }
 
-void Stop(){
-  digitalWrite(MotorPin, LOW);
-  OffTimer.end();
-  OnTimer.end();
+
+
+/*----------------Module Functions--------------------------*/
+int potRead(int pin){ // reads a potentiometer value and returns a value from 0 to 100
+  potval = analogRead(pin);            
+  return map(potval,0,1023,0,100);
 }
 
-void OnFxn(){
-  digitalWrite(MotorPin, HIGH);
-  OffTimer.begin(OffFxn,val*period/100); // part 1
-  OffTimer.begin(OffFxn, 50*period/100); // part 4
- // Serial.println("yo");
+void handleWaiting(void){
+    digitalWrite(REDLED,LOW);
+    digitalWrite(BLUELED,LOW);
+    digitalWrite(WAITINGLED,HIGH);
+    if (potRead(TEAMPOTPIN)>=75){
+       state = GO_TO_SHEEP_BLUE;
+     }
+    if (potRead(TEAMPOTPIN)<=25){
+       state = GO_TO_SHEEP_RED;
+     }
+
 }
 
-void OffFxn(){
-  digitalWrite(MotorPin, LOW);
-  OffTimer.end();
+void handleGoToBlueSheep(void){
+
+    digitalWrite(REDLED,LOW);
+    digitalWrite(BLUELED,HIGH);
+    digitalWrite(WAITINGLED,LOW);
+    //WRITE CODE FOR DRIVING TO SHEEP HERE
+
 }
 
-void ChangeDIR(){
-  if(direction == HIGH){
-    direction = LOW;
-     digitalWrite(pinDirection, LOW);
-  }
-  else{
-    //(direction == LOW){
-    direction = HIGH;
-    digitalWrite(pinDirection, HIGH);
-  }
- 
-  Serial.println(direction);
+void handleGoToRedSheep(void){
+    digitalWrite(REDLED,HIGH);
+    digitalWrite(BLUELED,LOW);
+    digitalWrite(WAITINGLED,LOW);
+    //WRITE CODE FOR DRIVING TO SHEEP HERE
 }
 
-// cant get 0 or 100 becuarse cant have 0 timer or have timers go off at same time
-//error due to setting both timers at different instances and time to switch transistors
-//want high f bc more stable (average V less wavering)
+void handleGG(void){ // all motors off, all LEDs off
+    digitalWrite(REDLED,LOW);
+    digitalWrite(BLUELED,LOW);
+    digitalWrite(WAITINGLED,LOW);
+    stopAllMotors();
+    state = GG;
+}
+
+void driveForward(void){//moves robot forward
+
+}
+
+void driveBackward(void){ // moves robot backward
+
+}
+
+void stopDriving(void){ // stops driving motors
+
+}
+
+void stopAllMotors(void){ // stops all motors
+
+}
+
+void turnRight(void){ // turns robot right
+
+}
+
+void turnLeft(void){ // turns robot left
+
+}
+
+void lineFollow(void){ // line following
+
+}
+
+
