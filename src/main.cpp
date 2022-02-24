@@ -3,10 +3,15 @@
 #include <SPI.h>
 
 /*---------------Module Defines-----------------------------*/
-
 #define REDLED 23
 #define BLUELED 22
 #define WAITINGLED 21
+#define IN3 19
+#define IN1  18
+#define IN4 17
+#define IN2 16
+#define STEP 15
+#define DIR 14
 #define TEAMPOTPIN A6
 //#define GGTIME 250000000
 #define GGTIME 20000000
@@ -45,6 +50,12 @@ int teamcolorval;
 /*---------------Main Functions----------------*/
 
 void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(DIR, OUTPUT);
+  pinMode(STEP, OUTPUT);
   pinMode(BLUELED, OUTPUT);
   pinMode(REDLED, OUTPUT);
   pinMode(WAITINGLED, OUTPUT);
@@ -98,7 +109,8 @@ void handleGoToBlueSheep(void){
     digitalWrite(REDLED,LOW);
     digitalWrite(BLUELED,HIGH);
     digitalWrite(WAITINGLED,LOW);
-    //WRITE CODE FOR DRIVING TO SHEEP HERE
+    driveForward();
+    //INSERT TIMED STOP
 
 }
 
@@ -106,7 +118,8 @@ void handleGoToRedSheep(void){
     digitalWrite(REDLED,HIGH);
     digitalWrite(BLUELED,LOW);
     digitalWrite(WAITINGLED,LOW);
-    //WRITE CODE FOR DRIVING TO SHEEP HERE
+    driveForward();
+    //INSERT TIMED STOP
 }
 
 void handleGG(void){ // all motors off, all LEDs off
@@ -118,7 +131,10 @@ void handleGG(void){ // all motors off, all LEDs off
 }
 
 void driveForward(void){//moves robot forward
-
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
 }
 
 void driveBackward(void){ // moves robot backward
