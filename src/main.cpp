@@ -180,12 +180,14 @@ void lineFollow(void){ // line following
 }
 
 void openDoor(void){
-   doorStepper.moveTo(50);
+   doorStepper.moveTo(5000);
+   doorStepper.setSpeed(600);
 
 }
 
 void closeDoor(void){
-  doorStepper.moveTo(-50);
+  doorStepper.moveTo(-5000);
+  doorStepper.setSpeed(600);
 
 }
 
