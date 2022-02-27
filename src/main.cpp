@@ -15,9 +15,9 @@
 #define STEP 14 // for stepper motor
 #define DIR 15 // for stepper motor
 #define TEAMPOTPIN A6
-#define speed_value 200
-//#define GGTIME 250000000
-#define GGTIME 20000000
+#define speed_value 100
+#define GGTIME 250000000
+//#define GGTIME 20000000
 
 #define Line_Threshold 2.5 //FILL THIS AND BELOW IN!
 #define Left_Line 1
@@ -94,6 +94,7 @@ void loop(){
       break;
     case GO_TO_SHEEP_RED:
       handleGoToRedSheep();
+
       break;
     case GG:
       handleGG();
@@ -139,8 +140,10 @@ void handleGoToRedSheep(void){
     digitalWrite(REDLED,HIGH);
     digitalWrite(BLUELED,LOW);
     digitalWrite(WAITINGLED,LOW);
-    //driveForward(speed_value);
-    openDoor();
+    driveForward(speed_value);
+    //openDoor();
+    ////closeDoor();
+    
     //INSERT TIMED STOP
 }
 
@@ -153,17 +156,22 @@ void handleGG(void){ // all motors off, all LEDs off
 }
 
 void driveForward(int speed){//moves robot forward
+  Serial.println("fwd");
   digitalWrite(IN1_L, HIGH);
   digitalWrite(IN2_L, LOW);
   digitalWrite(IN3_R, HIGH);
   digitalWrite(IN4_R, LOW);
   analogWrite(ENA_L, speed);
   analogWrite(ENB_R, speed);
+  delay(3000);
+  stopDriving();
+  delay(5000);  
 
 
 }
 
 void driveBackward(int speed){ // moves robot backward
+  Serial.println("backwards");
   digitalWrite(IN2_L, HIGH);
   digitalWrite(IN1_L, LOW);
   digitalWrite(IN4_R, HIGH);
@@ -173,8 +181,10 @@ void driveBackward(int speed){ // moves robot backward
 }
 
 void stopDriving(void){ // stops driving motors
+  Serial.println("stop");
   analogWrite(ENA_L, 0);
   analogWrite(ENB_R, 0);
+  
 }
 
 void stopAllMotors(void){ // stops all motors
@@ -225,16 +235,28 @@ else
 }
 
 void openDoor(void){
-   doorStepper.moveTo(5000);
-   doorStepper.setSpeed(600);
-   doorStepper.run();
+  Serial.println("open door");
+   //doorStepper.moveTo(-100);
+   //doorStepper.setSpeed(-600); 
+   //doorStepper.run();
+   
+  doorStepper.moveTo(-800); 
+  doorStepper.setSpeed(-600); 
+  
+  while (doorStepper.currentPosition() != doorStepper.targetPosition()) { 
+    doorStepper.runSpeedToPosition();
+    }
 
 }
 
 void closeDoor(void){
-  doorStepper.moveTo(-5000);
-  doorStepper.setSpeed(600);
-  doorStepper.run();
+  Serial.println("close door");
+  doorStepper.moveTo(800); 
+  doorStepper.setSpeed(600); 
+  
+  while (doorStepper.currentPosition() != doorStepper.targetPosition()) { 
+    doorStepper.runSpeedToPosition();
+    }
 
 }
 
